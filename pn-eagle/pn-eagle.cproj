@@ -151,6 +151,12 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="logger.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="logger.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -160,7 +166,10 @@
     <Compile Include="peripherals\uart.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="structures\circ_buffer.c">
+    <Compile Include="protocol.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="protocol.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="structures\circ_buffer.h">
