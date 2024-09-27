@@ -1,22 +1,25 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "sys.h"
-#include "peripherals/uart.h"
-#include "structures/circ_buffer.h"
+#include "uart.h"
+#include "circ_buffer.h"
 #include "protocol.h"
 #include "logger.h"
 
 void usartReceivedByteEvent(uint8_t byte);
 void loggerStringToSendEvent(const char *buffer);
 
+uint8_t rxBufferData[64];
+uint8_t txBufferData[64];
 circ_buffer_t rxBuffer;
 circ_buffer_t txBuffer;
 
 int main(void) {
     uart_init(9600, usartReceivedByteEvent);
 	
-	circBuffer_init(&rxBuffer);
-	circBuffer_init(&txBuffer);
+	circBuffer_init(&rxBuffer, rxBufferData, sizeof(rxBufferData));
+	circBuffer_init(&txBuffer, txBufferData, sizeof(txBufferData));
+	
 	logger_init(loggerStringToSendEvent);
 	
 	sei();
@@ -40,6 +43,7 @@ int main(void) {
 
 void usartReceivedByteEvent(uint8_t byte) {
 	circBuffer_put(&rxBuffer, byte);
+	logger_println("T");
 }
 
 void loggerStringToSendEvent(const char *buffer) {

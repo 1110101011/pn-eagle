@@ -3,13 +3,8 @@
 
 #include <stdint.h>
 
-typedef struct {
-	uint8_t data[48];
-	uint8_t dataIndex;
-	uint8_t prefixIndex;
-} protocol_frame_t;
-
 void protocol_init(void);
 void protocol_newByte(uint8_t byte);
+void protocol_parseFrame(char *frame);
 
 #endif /* PROTOCOL_H_ */

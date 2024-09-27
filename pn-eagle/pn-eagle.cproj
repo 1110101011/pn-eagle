@@ -73,40 +73,44 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <AvrGcc>
-        <avrgcc.common.Device>-mmcu=atmega128a -B "%24(PackRepoDir)\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega128a"</avrgcc.common.Device>
-        <avrgcc.common.optimization.RelaxBranches>True</avrgcc.common.optimization.RelaxBranches>
-        <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
-        <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
-        <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
-        <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
-        <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
-        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
-        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
-        <avrgcc.compiler.symbols.DefSymbols>
-          <ListValues>
-            <Value>NDEBUG</Value>
-          </ListValues>
-        </avrgcc.compiler.symbols.DefSymbols>
-        <avrgcc.compiler.directories.IncludePaths>
-          <ListValues>
-            <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.7.374\include\</Value>
-          </ListValues>
-        </avrgcc.compiler.directories.IncludePaths>
-        <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
-        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
-        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
-        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
-        <avrgcc.linker.libraries.Libraries>
-          <ListValues>
-            <Value>libm</Value>
-          </ListValues>
-        </avrgcc.linker.libraries.Libraries>
-        <avrgcc.assembler.general.IncludePaths>
-          <ListValues>
-            <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.7.374\include\</Value>
-          </ListValues>
-        </avrgcc.assembler.general.IncludePaths>
-      </AvrGcc>
+  <avrgcc.common.Device>-mmcu=atmega128a -B "%24(PackRepoDir)\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega128a"</avrgcc.common.Device>
+  <avrgcc.common.optimization.RelaxBranches>True</avrgcc.common.optimization.RelaxBranches>
+  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+  <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>NDEBUG</Value>
+    </ListValues>
+  </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.7.374\include\</Value>
+      <Value>../Communication</Value>
+      <Value>../Peripherals</Value>
+      <Value>../Structures</Value>
+      <Value>..</Value>
+    </ListValues>
+  </avrgcc.compiler.directories.IncludePaths>
+  <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+  <avrgcc.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </avrgcc.linker.libraries.Libraries>
+  <avrgcc.assembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.7.374\include\</Value>
+    </ListValues>
+  </avrgcc.assembler.general.IncludePaths>
+</AvrGcc>
     </ToolchainSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -151,28 +155,28 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="logger.c">
+    <Compile Include="Communication\logger.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="logger.h">
+    <Compile Include="Communication\logger.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Communication\protocol.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Communication\protocol.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="peripherals\uart.c">
+    <Compile Include="Peripherals\uart.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="peripherals\uart.h">
+    <Compile Include="Peripherals\uart.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="protocol.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="protocol.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="structures\circ_buffer.h">
+    <Compile Include="Structures\circ_buffer.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="sys.c">
@@ -183,8 +187,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="structures" />
-    <Folder Include="peripherals" />
+    <Folder Include="Communication" />
+    <Folder Include="Structures" />
+    <Folder Include="Peripherals" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

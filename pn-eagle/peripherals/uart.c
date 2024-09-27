@@ -1,5 +1,5 @@
 #include "uart.h"
-#include "../sys.h"
+#include "sys.h"
 #include <avr/io.h>
 
 static usart_t usart;
