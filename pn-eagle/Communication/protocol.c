@@ -1,6 +1,7 @@
 #include "protocol.h"
 #include "circ_buffer.h"
 #include "logger.h"
+#include <string.h>
 
 static const char protocolRequestPrefix[] = "MMNR33,";
 static const char protocolResponsePrefix[] = "MMNT44,";
@@ -15,21 +16,30 @@ void protocol_init(void) {
 
 void protocol_newByte(uint8_t byte) {
 	if (byte == '\r' || byte == '\n') {
+	    if (circBuffer_elements(&protocolRequestBuffer) <= strlen(protocolRequestPrefix)) {
+	        circBuffer_clear(&protocolRequestBuffer);
+	        return;
+	    }
+	    
 		uint8_t prefixIndex = 0;
 		uint8_t frameIndex = 0;
-		logger_println("N");
+		
 		while (circBuffer_elements(&protocolRequestBuffer)) {
 			uint8_t byte = circBuffer_get(&protocolRequestBuffer);
 			
-			if (prefixIndex >= sizeof(protocolRequestPrefix)) {
+			if (prefixIndex >= strlen(protocolRequestPrefix)) {
 				protocolRequestFrame[frameIndex++] = byte;
 			} else if (byte == protocolRequestPrefix[prefixIndex]) {
 				prefixIndex++;
+			} else {
+			    circBuffer_clear(&protocolRequestBuffer);
+			    return;
 			}
 		}
-		protocolRequestFrame[frameIndex] = 0;
 		
 		circBuffer_clear(&protocolRequestBuffer);
+		
+		protocolRequestFrame[frameIndex] = 0;
 		protocol_parseFrame(protocolRequestFrame);
 	} else {
 		circBuffer_put(&protocolRequestBuffer, byte);
