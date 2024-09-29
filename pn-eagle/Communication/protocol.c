@@ -1,51 +1,80 @@
 #include "protocol.h"
 #include "circ_buffer.h"
-#include "logger.h"
+#include <avr/io.h>
 #include <string.h>
+#include <stdlib.h>
+#include "logger.h"
 
-static const char protocolRequestPrefix[] = "MMNR33,";
-static const char protocolResponsePrefix[] = "MMNT44,";
+static const char requestPrefix[] = "MMNR33,";
+static const char responsePrefix[] = "MMNT44,";
 
-static uint8_t protocolRequestBufferData[64];
-static circ_buffer_t protocolRequestBuffer;
-static char protocolRequestFrame[64];
+static void (*protocolFrameParsedCallback)(uint16_t *fieldArray, uint8_t fieldCount);
 
-void protocol_init(void) {
-	circBuffer_init(&protocolRequestBuffer, protocolRequestBufferData, sizeof(protocolRequestBufferData));
+static uint8_t requestBufferData[64];
+static circ_buffer_t requestBuffer;
+static char requestFrame[64];
+
+void protocol_init(void (*protocolFrameParsedEvent)(uint16_t*, uint8_t)) {
+	protocolFrameParsedCallback = protocolFrameParsedEvent;
+	circBuffer_init(&requestBuffer, requestBufferData, sizeof(requestBufferData));
 }
 
 void protocol_newByte(uint8_t byte) {
 	if (byte == '\r' || byte == '\n') {
-	    if (circBuffer_elements(&protocolRequestBuffer) <= strlen(protocolRequestPrefix)) {
-	        circBuffer_clear(&protocolRequestBuffer);
+	    if (circBuffer_elements(&requestBuffer) <= strlen(requestPrefix)) {
+	        circBuffer_clear(&requestBuffer);
 	        return;
 	    }
 	    
 		uint8_t prefixIndex = 0;
 		uint8_t frameIndex = 0;
 		
-		while (circBuffer_elements(&protocolRequestBuffer)) {
-			uint8_t byte = circBuffer_get(&protocolRequestBuffer);
+		while (circBuffer_elements(&requestBuffer)) {
+			uint8_t byte = circBuffer_get(&requestBuffer);
 			
-			if (prefixIndex >= strlen(protocolRequestPrefix)) {
-				protocolRequestFrame[frameIndex++] = byte;
-			} else if (byte == protocolRequestPrefix[prefixIndex]) {
+			if (prefixIndex >= strlen(requestPrefix)) {
+				requestFrame[frameIndex++] = byte;
+			} else if (byte == requestPrefix[prefixIndex]) {
 				prefixIndex++;
 			} else {
-			    circBuffer_clear(&protocolRequestBuffer);
+			    circBuffer_clear(&requestBuffer);
 			    return;
 			}
 		}
+		requestFrame[frameIndex] = '\0';
 		
-		circBuffer_clear(&protocolRequestBuffer);
+		uint16_t frameFieldArray[16];
+		uint8_t frameFieldNum;
+		protocol_parseFrame(requestFrame, frameFieldArray, &frameFieldNum);
 		
-		protocolRequestFrame[frameIndex] = 0;
-		protocol_parseFrame(protocolRequestFrame);
+		if (frameFieldArray[frameFieldNum - 1] > 0) {
+			// TODO: obliczanie crc
+			circBuffer_clear(&requestBuffer);
+			return;
+		}
+		
+		protocolFrameParsedCallback(frameFieldArray, frameFieldNum - 1);
+		circBuffer_clear(&requestBuffer);
 	} else {
-		circBuffer_put(&protocolRequestBuffer, byte);
+		circBuffer_put(&requestBuffer, byte);
 	}
 }
 
-void protocol_parseFrame(char *frame) {
-	logger_println("T");
+void protocol_parseFrame(char *frame, uint16_t *fieldArray, uint8_t *fieldNum) {
+	char temp[strlen(frame) + 1];
+	strcpy(temp, frame);
+
+	char *token = strtok(temp, ",");
+	uint8_t index = 0;
+
+	while (token != NULL) {
+		fieldArray[index++] = atoi(token);  
+		token = strtok(NULL, ",");
+	}
+
+	*fieldNum = index;
+}
+
+void protocol_generateFrame(uint16_t *fieldArray, uint8_t fieldNum) {
+	
 }
