@@ -11,9 +11,9 @@ void extint_init(void (*edgeEvent)(uint8_t, uint8_t)) {
 	PORTD |= (1 << PD0) | (1 << PD1) | (1 << PD2);
 	PORTB |= (1 << PB0) | (1 << PB2) | (1 << PB3);
 	
-	EICRA |= (1 << ISC01) | (1 << ISC00);	// INT0 (PD0) rising edge 
-	EICRA |= (1 << ISC11) | (1 << ISC10);	// INT1 (PD1) rising edge 
-	EICRA |= (1 << ISC21) | (1 << ISC20);	// INT2 (PD2) rising edge 
+	EICRA |= (1 << ISC01);	// INT0 (PD0) falling edge 
+	EICRA |= (1 << ISC11);	// INT1 (PD1) falling edge 
+	EICRA |= (1 << ISC21);	// INT2 (PD2) falling edge 
 
 	EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2);
 }

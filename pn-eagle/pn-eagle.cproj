@@ -167,6 +167,9 @@
     <Compile Include="Communication\protocol.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="config.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="core.c">
       <SubType>compile</SubType>
     </Compile>

@@ -1,6 +1,7 @@
 #include "core.h"
 #include "logger.h"
 #include "protocol.h"
+#include "config.h"
 #include <avr/io.h>
 
 uint8_t rxBufferData[128];
@@ -8,19 +9,19 @@ uint8_t txBufferData[128];
 circ_buffer_t rxBuffer;
 circ_buffer_t txBuffer;
 
-actuator_t actuator[3];
-encoder_t encoder[3];
+actuator_t actuator[CONF_ACTUATOR_COUNT];
+encoder_t encoder[CONF_ACTUATOR_COUNT];
 
 void coreInit(void) {
 	protocol_init(protocolFrameParsedEvent);
 	
-	actuator_init(&actuator[0], &gpio_d, 4, 0);
-	actuator_init(&actuator[1], &gpio_d, 5, 1);
-	actuator_init(&actuator[2], &gpio_d, 6, 2);
-	
 	encoder_init(&encoder[0]);
 	encoder_init(&encoder[1]);
 	encoder_init(&encoder[2]);
+	
+	actuator_init(&actuator[0], &gpio_d, 4, 0, &encoder[0]);
+	actuator_init(&actuator[1], &gpio_d, 5, 1, &encoder[1]);
+	actuator_init(&actuator[2], &gpio_d, 6, 2, &encoder[2]);
 }
 
 void usartReceivedByteEvent(uint8_t byte) {
@@ -38,9 +39,20 @@ void loggerStringToSendEvent(const char *buffer) {
 }
 
 void protocolFrameParsedEvent(uint16_t *fieldArray, uint8_t fieldCount) {
-	uint8_t channels = fieldCount - 1;
+	uint8_t positionNumber = fieldCount - 1;
+	uint8_t homingFlag = fieldArray[fieldCount - 1];
 	
-	for (uint8_t i = 0; i < 3; i++) {
+	if (positionNumber != CONF_ACTUATOR_COUNT) {
+		return;
+	}
+	
+	if (homingFlag == 1) {
+		for (uint8_t i = 0; i < positionNumber; i++) {
+			actuator_startHoming(&actuator[i]);
+		}
+	}
+	
+	for (uint8_t i = 0; i < positionNumber; i++) {
 		actuator_setTargetPos(&actuator[i], fieldArray[i]);
 	}
 }

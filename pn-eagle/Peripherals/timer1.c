@@ -2,6 +2,11 @@
 #include <avr/io.h>
 
 void timer1_init(void) {
+	DDRB |= 
+		(1 << PB5) | 
+		(1 << PB6) | 
+		(1 << PB7);
+	
 	TCCR1A |= 
 		(1 << WGM11);  	             
 	TCCR1B |= 
@@ -24,15 +29,18 @@ void timer1_setChannelDuty(uint8_t channel, uint8_t duty) {
 	if (value > 0) {
 		switch (channel) {
 		case 0:
-			TCCR1A |= (1 << COM1A1);
+			TCCR1A |= 
+				(1 << COM1A1);
 			OCR1A = value;
 			break;
 		case 1:
-			TCCR1A |= (1 << COM1B1);
+			TCCR1A |= 
+				(1 << COM1B1);
 			OCR1B = value;
 			break;
 		case 2:
-			TCCR1A |= (1 << COM1C1);
+			TCCR1A |= 
+				(1 << COM1C1);
 			OCR1C = value;
 			break;
 		default:
@@ -41,13 +49,16 @@ void timer1_setChannelDuty(uint8_t channel, uint8_t duty) {
 	} else {
 		switch (channel) {
 		case 0:
-			TCCR1A &= ~(1 << COM1A1);
+			TCCR1A &= 
+				~(1 << COM1A1);
 			break;
 		case 1:
-			TCCR1A &= ~(1 << COM1B1);
+			TCCR1A &= 
+				~(1 << COM1B1);
 			break;
 		case 2:
-			TCCR1A &= ~(1 << COM1C1);
+			TCCR1A &= 
+				~(1 << COM1C1);
 			break;
 		default:
 			return;

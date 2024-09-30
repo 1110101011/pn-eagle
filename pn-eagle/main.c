@@ -1,6 +1,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdlib.h>
+#include <string.h>
+#include "config.h"
 #include "sys.h"
 #include "core.h"
 #include "uart0.h"
@@ -11,12 +13,10 @@
 #include "logger.h"
 
 uint32_t tim1ms_nextTime = 0;
-uint32_t tim500ms_nextTime = 0;
+uint32_t tim1000ms_nextTime = 0;
 
 int main(void) {
 	sys_init();
-	
-	DDRB |= (1 << PB5) | (1 << PB6) | (1 << PB7);
 	
     uart0_init(57600, usartReceivedByteEvent);
 	logger_init(loggerStringToSendEvent);
@@ -44,29 +44,46 @@ int main(void) {
 			uart0_sendByte(byte);
 		}
 		
-		if (tim1ms_nextTime <= sys_time) {  // 1ms		
-			actuator_setCurrentPos(&actuator[0], encoder[0].count);
-			actuator_setCurrentPos(&actuator[1], encoder[1].count);
-			actuator_setCurrentPos(&actuator[2], encoder[2].count);
-			actuator_process1ms(&actuator[0]);
-			actuator_process1ms(&actuator[1]);
-			actuator_process1ms(&actuator[2]);
-			
+		// timer 1ms
+		if (tim1ms_nextTime <= sys_time) {  	
 			tim1ms_nextTime = sys_time + 1;
 		}	
 		
-		if (tim500ms_nextTime <= sys_time) {
+		// timer 1000ms
+		if (tim1000ms_nextTime <= sys_time) {
+			int16_t fields[] = {
+				actuator_getCurrentPos(&actuator[0]),
+				actuator_getTargetPos(&actuator[0]),
+				actuator_getCurrentPos(&actuator[1]),
+				actuator_getTargetPos(&actuator[1]),
+				actuator_getCurrentPos(&actuator[2]),
+				actuator_getTargetPos(&actuator[2]),
+				0,
+				0,
+				0
+			};
 			
-			logger_printValue("ec2:", encoder[1].count);
-			logger_printValue("ac2:", actuator[1].currentPos);
-			logger_printValue("at2:", actuator[1].targetPos);
-			logger_printValue("es2:", encoder[1].speed);
+			char *frame1 = protocol_generateAnswer(fields, sizeof(fields) / sizeof(fields[0]));
+			
+			for (uint8_t i = 0; i < strlen(frame1); i++) {
+				circBuffer_put(&txBuffer, (uint8_t) frame1[i]);
+			}
+			/*
+			logger_printValue("act1_cur:", actuator[0].currentPos);
+			logger_printValue("act1_tar:", actuator[0].targetPos);
+			logger_printValue("enc1_spd:", encoder[0].speed);
 			logger_print(logger_endl);
-			tim500ms_nextTime = sys_time + 500;
+			logger_printValue("act2_cur:", actuator[1].currentPos);
+			logger_printValue("act2_tar:", actuator[1].targetPos);
+			logger_printValue("enc2_spd:", encoder[1].speed);
+			logger_print(logger_endl);
+			*/
+			tim1000ms_nextTime = sys_time + 1000;
 		}
 		
-		encoder_process(&encoder[0], sys_time);
-		encoder_process(&encoder[1], sys_time);
-		encoder_process(&encoder[2], sys_time);
+		for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
+			encoder_process(&encoder[i], sys_time);
+			actuator_process(&actuator[i], sys_time);
+		}
     }
 }

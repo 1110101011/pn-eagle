@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "circ_buffer.h"
+#include "config.h"
 #include "actuator.h"
 #include "encoder.h"
 
@@ -11,8 +12,8 @@ extern uint8_t txBufferData[128];
 extern circ_buffer_t rxBuffer;
 extern circ_buffer_t txBuffer;
 
-extern actuator_t actuator[3];
-extern encoder_t encoder[3];
+extern actuator_t actuator[CONF_ACTUATOR_COUNT];
+extern encoder_t encoder[CONF_ACTUATOR_COUNT];
 
 void coreInit(void);
 

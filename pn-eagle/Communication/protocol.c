@@ -14,6 +14,8 @@ static uint8_t requestBufferData[64];
 static circ_buffer_t requestBuffer;
 static char requestFrame[64];
 
+static char answerFrame[64];
+
 void protocol_init(void (*protocolFrameParsedEvent)(uint16_t*, uint8_t)) {
 	protocolFrameParsedCallback = protocolFrameParsedEvent;
 	circBuffer_init(&requestBuffer, requestBufferData, sizeof(requestBufferData));
@@ -60,8 +62,8 @@ void protocol_newByte(uint8_t byte) {
 	}
 }
 
-void protocol_parseFrame(char *frame, uint16_t *fieldArray, uint8_t *fieldNum) {
-	char temp[strlen(frame) + 1];
+void protocol_parseFrame(char *frame, int16_t *fieldArray, uint8_t *fieldNum) {
+	char temp[64];
 	strcpy(temp, frame);
 
 	char *token = strtok(temp, ",");
@@ -75,6 +77,19 @@ void protocol_parseFrame(char *frame, uint16_t *fieldArray, uint8_t *fieldNum) {
 	*fieldNum = index;
 }
 
-void protocol_generateFrame(uint16_t *fieldArray, uint8_t fieldNum) {
+char* protocol_generateAnswer(int16_t *fieldArray, uint8_t fieldNum) {
+	char fieldBuffer[5];
+	uint16_t crc = 0; // TODO: obliczanie crc
 	
+	strcpy(answerFrame, responsePrefix);
+	
+	for (uint8_t i = 0; i < fieldNum; i++) {
+		strcat(answerFrame, itoa(fieldArray[i], fieldBuffer, 10));
+		strcat(answerFrame, ",");
+	}
+	
+	strcat(answerFrame, itoa(crc, fieldBuffer, 10));
+	strcat(answerFrame, "\r\n");
+	
+	return answerFrame;
 }
