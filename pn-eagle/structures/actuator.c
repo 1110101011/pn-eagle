@@ -137,7 +137,7 @@ void actuator_process(actuator_t* actuator, uint32_t currentTime) {
 			
 			if (actuator->stopTime >= 2000) {
 				actuator->speed = 0;
-				actuator->encoder->count = -1;
+				actuator->encoder->count = -2;
 				actuator->stopTime = 0;
 				actuator->homingDone = 1;
 				actuator->errorCode = ERROR_OK;

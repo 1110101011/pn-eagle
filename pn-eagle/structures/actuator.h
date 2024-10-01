@@ -2,15 +2,12 @@
 #define INC_ACTUATOR_H_
 
 #define ACTUATOR_PROCESS_PERIOD		1		// ms
-#define ACTUATOR_HOMING_STOP_TIME	2000	// ms
-#define ACTUATOR_HOMING_DUTY		150
 
 #define ACTUATOR_PID_KP				40000
-#define ACTUATOR_PID_KI				750
+#define ACTUATOR_PID_KI				500
 #define ACTUATOR_PID_KD				1000
-#define ACTUATOR_INTEGRAL_LIMIT		150
+#define ACTUATOR_INTEGRAL_LIMIT		100
 
-// PD 40000, 500, 1000, 100
 
 #include <stdint.h>
 #include "gpio.h"
