@@ -6,11 +6,11 @@
 #define ACTUATOR_HOMING_DUTY		150
 
 #define ACTUATOR_PID_KP				40000
-#define ACTUATOR_PID_KI				500
+#define ACTUATOR_PID_KI				750
 #define ACTUATOR_PID_KD				1000
-#define ACTUATOR_INTEGRAL_LIMIT		100
+#define ACTUATOR_INTEGRAL_LIMIT		150
 
-// PD 30000, 1000
+// PD 40000, 500, 1000, 100
 
 #include <stdint.h>
 #include "gpio.h"
@@ -18,12 +18,18 @@
 #include "pid.h"
 
 typedef enum {
-	NORMAL,
-	HOMING_COARSE,
-	HOMING_RETURN,
-	HOMING_FINE,
-	ERROR
+	STATE_NORMAL,
+	STATE_ERROR,
+	STATE_HOMING_COARSE,
+	STATE_HOMING_RETURN,
+	STATE_HOMING_FINE
 } actuator_state_t;
+
+typedef enum {
+	ERROR_OK = 0x00,
+	ERROR_BLOCKED = 0x01,
+	ERROR_OK_HOMING = 0x02	// tymczasowe
+} actuator_error_t;
 
 typedef struct {
 	const gpio_t *dirGpio;
@@ -33,13 +39,14 @@ typedef struct {
 	pid_t pid;
 	
 	actuator_state_t state;
-	uint32_t lastTime;
-	
+	actuator_error_t errorCode;
+	uint32_t lastTime;	
+	uint16_t stopTime;
 	int16_t targetPos;
 	int16_t speed;
 	int16_t lastSpeed;
 	uint8_t homingDone;
-	uint16_t homingStopTime;
+	uint16_t homingTime;
 } actuator_t;
 
 void actuator_init(actuator_t* actuator, const gpio_t *dirGpio, uint8_t dirPin, uint8_t pwmChannel, encoder_t *encoder);
@@ -47,6 +54,7 @@ void actuator_startHoming(actuator_t* actuator);
 void actuator_setTargetPos(actuator_t* actuator, int16_t targetPos);
 int16_t actuator_getTargetPos(actuator_t* actuator);
 int16_t actuator_getCurrentPos(actuator_t* actuator);
+actuator_error_t actuator_getErrorCode(actuator_t* actuator);
 
 void actuator_process(actuator_t* actuator, uint32_t currentTime);
 

@@ -12,8 +12,8 @@
 #include "protocol.h"
 #include "logger.h"
 
-uint32_t tim1ms_nextTime = 0;
-uint32_t tim1000ms_nextTime = 0;
+static uint32_t tim1ms_nextTime = 0;
+static uint32_t tim100ms_nextTime = 0;
 
 int main(void) {
 	sys_init();
@@ -45,31 +45,31 @@ int main(void) {
 		}
 		
 		// timer 1ms
-		if (tim1ms_nextTime <= sys_time) {  	
+		if (tim1ms_nextTime <= sys_time) {  
+				
 			tim1ms_nextTime = sys_time + 1;
 		}	
 		
-		// timer 1000ms
-		if (tim1000ms_nextTime <= sys_time) {
-			int16_t fields[] = {
-				actuator_getCurrentPos(&actuator[0]),
-				actuator_getTargetPos(&actuator[0]),
-				actuator_getCurrentPos(&actuator[1]),
-				actuator_getTargetPos(&actuator[1]),
-				actuator_getCurrentPos(&actuator[2]),
-				actuator_getTargetPos(&actuator[2]),
-				actuator[0].speed,
-				actuator[1].speed,
-				actuator[2].speed
-			};
+		// timer 100ms
+		if (tim100ms_nextTime <= sys_time) {
+			int16_t fieldArray[CONF_ACTUATOR_COUNT * 3];
 			
-			char *frame1 = protocol_generateAnswer(fields, sizeof(fields) / sizeof(fields[0]));
+			for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
+				fieldArray[i * 2] = actuator_getCurrentPos(&actuator[i]);
+				fieldArray[(i * 2) + 1] = actuator_getTargetPos(&actuator[i]);
+			}
 			
-			for (uint8_t i = 0; i < strlen(frame1); i++) {
-				circBuffer_put(&txBuffer, (uint8_t) frame1[i]);
+			for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
+				fieldArray[(CONF_ACTUATOR_COUNT * 2) + i] = actuator_getErrorCode(&actuator[i]);
+			}
+			
+			char *frameBuffer = protocol_generateAnswer(fieldArray, sizeof(fieldArray) / sizeof(fieldArray[0]));
+			
+			for (uint8_t i = 0; i < strlen(frameBuffer); i++) {
+				circBuffer_put(&txBuffer, (uint8_t) frameBuffer[i]);
 			}
 	
-			tim1000ms_nextTime = sys_time + 1000;
+			tim100ms_nextTime = sys_time + 100;
 		}
 		
 		for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {

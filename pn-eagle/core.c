@@ -50,6 +50,7 @@ void protocolFrameParsedEvent(int16_t *fieldArray, uint8_t fieldCount) {
 		for (uint8_t i = 0; i < positionNumber; i++) {
 			actuator_startHoming(&actuator[i]);
 		}
+		return;
 	}
 	
 	for (uint8_t i = 0; i < positionNumber; i++) {
