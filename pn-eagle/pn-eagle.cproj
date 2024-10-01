@@ -218,6 +218,12 @@
     <Compile Include="Structures\encoder.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Structures\pid.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Structures\pid.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="sys.c">
       <SubType>compile</SubType>
     </Compile>

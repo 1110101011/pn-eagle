@@ -58,9 +58,9 @@ int main(void) {
 				actuator_getTargetPos(&actuator[1]),
 				actuator_getCurrentPos(&actuator[2]),
 				actuator_getTargetPos(&actuator[2]),
-				0,
-				0,
-				0
+				actuator[0].speed,
+				actuator[1].speed,
+				actuator[2].speed
 			};
 			
 			char *frame1 = protocol_generateAnswer(fields, sizeof(fields) / sizeof(fields[0]));
@@ -68,16 +68,7 @@ int main(void) {
 			for (uint8_t i = 0; i < strlen(frame1); i++) {
 				circBuffer_put(&txBuffer, (uint8_t) frame1[i]);
 			}
-			/*
-			logger_printValue("act1_cur:", actuator[0].currentPos);
-			logger_printValue("act1_tar:", actuator[0].targetPos);
-			logger_printValue("enc1_spd:", encoder[0].speed);
-			logger_print(logger_endl);
-			logger_printValue("act2_cur:", actuator[1].currentPos);
-			logger_printValue("act2_tar:", actuator[1].targetPos);
-			logger_printValue("enc2_spd:", encoder[1].speed);
-			logger_print(logger_endl);
-			*/
+	
 			tim1000ms_nextTime = sys_time + 1000;
 		}
 		

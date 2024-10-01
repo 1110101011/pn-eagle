@@ -38,7 +38,7 @@ void loggerStringToSendEvent(const char *buffer) {
 	}
 }
 
-void protocolFrameParsedEvent(uint16_t *fieldArray, uint8_t fieldCount) {
+void protocolFrameParsedEvent(int16_t *fieldArray, uint8_t fieldCount) {
 	uint8_t positionNumber = fieldCount - 1;
 	uint8_t homingFlag = fieldArray[fieldCount - 1];
 	

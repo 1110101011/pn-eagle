@@ -8,7 +8,7 @@
 static const char requestPrefix[] = "MMNR33,";
 static const char responsePrefix[] = "MMNT44,";
 
-static void (*protocolFrameParsedCallback)(uint16_t *fieldArray, uint8_t fieldCount);
+static void (*protocolFrameParsedCallback)(int16_t *fieldArray, uint8_t fieldCount);
 
 static uint8_t requestBufferData[64];
 static circ_buffer_t requestBuffer;
@@ -16,7 +16,7 @@ static char requestFrame[64];
 
 static char answerFrame[64];
 
-void protocol_init(void (*protocolFrameParsedEvent)(uint16_t*, uint8_t)) {
+void protocol_init(void (*protocolFrameParsedEvent)(int16_t*, uint8_t)) {
 	protocolFrameParsedCallback = protocolFrameParsedEvent;
 	circBuffer_init(&requestBuffer, requestBufferData, sizeof(requestBufferData));
 }
@@ -45,7 +45,7 @@ void protocol_newByte(uint8_t byte) {
 		}
 		requestFrame[frameIndex] = '\0';
 		
-		uint16_t frameFieldArray[16];
+		int16_t frameFieldArray[16];
 		uint8_t frameFieldNum;
 		protocol_parseFrame(requestFrame, frameFieldArray, &frameFieldNum);
 		
