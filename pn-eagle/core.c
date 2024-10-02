@@ -23,6 +23,10 @@ void coreInit(void) {
 	actuator_init(&actuator[0], &gpio_d, 4, 0, &encoder[0]);
 	actuator_init(&actuator[1], &gpio_d, 5, 1, &encoder[1]);
 	actuator_init(&actuator[2], &gpio_d, 6, 2, &encoder[2]);
+	
+	for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
+		actuator_startHoming(&actuator[i]);
+	}
 }
 
 void usartReceivedByteEvent(uint8_t byte) {
@@ -59,7 +63,7 @@ void protocolFrameParsedEvent(int16_t *fieldArray, uint8_t fieldCount) {
 	}
 }
 
-void timer100msEvent(void) {
+void timer200msEvent(void) {
 	int16_t fieldArray[CONF_ACTUATOR_COUNT * 3];
 	
 	for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
