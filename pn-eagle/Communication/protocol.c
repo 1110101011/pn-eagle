@@ -51,8 +51,8 @@ void protocol_newByte(uint8_t byte) {
 		
 		if (frameFieldArray[frameFieldNum - 1] > 0) {
 			// TODO: obliczanie crc
-			circBuffer_clear(&requestBuffer);
-			return;
+			//circBuffer_clear(&requestBuffer);
+			//return;
 		}
 		
 		protocolFrameParsedCallback(frameFieldArray, frameFieldNum - 1);
