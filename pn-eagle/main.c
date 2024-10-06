@@ -18,6 +18,7 @@ static uint32_t tim200ms_nextTime = 0;
 
 int main(void) {
 	wdt_enable(WDTO_120MS);
+	
 	sys_init();
 	
     uart0_init(CONF_UART_BAUD, usartReceivedByteEvent);

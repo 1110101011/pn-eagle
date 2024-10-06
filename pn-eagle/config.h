@@ -1,7 +1,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#define VERSION_STRING			"v1.02"
+#define VERSION_STRING			"v1.03"
 
 #define CONF_ACTUATOR_COUNT		3
 #define CONF_UART_BAUD			9600
