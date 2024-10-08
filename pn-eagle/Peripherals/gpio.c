@@ -1,5 +1,5 @@
-#include "gpio.h"
 #include <avr/io.h>
+#include "gpio.h"
 
 const gpio_t gpio_a = {&DDRA, &PORTA};
 const gpio_t gpio_b = {&DDRB, &PORTB};

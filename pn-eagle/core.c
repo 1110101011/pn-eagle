@@ -1,9 +1,9 @@
+#include <avr/io.h>
+#include <string.h>
 #include "core.h"
 #include "logger.h"
 #include "protocol.h"
 #include "config.h"
-#include <avr/io.h>
-#include <string.h>
 
 uint8_t rxBufferData[128];
 uint8_t txBufferData[128];
@@ -33,7 +33,7 @@ void usartReceivedByteEvent(uint8_t byte) {
 	circBuffer_put(&rxBuffer, byte);
 }
 
-void extintEdgeEvent(uint8_t channel, uint8_t dir) {
+void extintEdgeEvent(uint8_t channel, int8_t dir) {
 	encoder_update(&encoder[channel], dir);
 }
 
@@ -59,7 +59,7 @@ void protocolFrameParsedEvent(int16_t *fieldArray, uint8_t fieldCount) {
 	}
 	
 	for (uint8_t i = 0; i < positionNumber; i++) {
-		actuator_setTargetPos(&actuator[i], fieldArray[i]);
+		actuator_setTargetPos(&actuator[i], fieldArray[i] * 2);
 	}
 }
 
@@ -67,8 +67,8 @@ void timer200msEvent(void) {
 	int16_t fieldArray[CONF_ACTUATOR_COUNT * 3];
 	
 	for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
-		fieldArray[i * 2] = actuator_getCurrentPos(&actuator[i]);
-		fieldArray[(i * 2) + 1] = actuator_getTargetPos(&actuator[i]);
+		fieldArray[i * 2] = actuator_getCurrentPos(&actuator[i]) / 2;
+		fieldArray[(i * 2) + 1] = actuator_getTargetPos(&actuator[i]) / 2;
 	}
 	
 	for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
@@ -80,8 +80,4 @@ void timer200msEvent(void) {
 	for (uint8_t i = 0; i < strlen(frameBuffer); i++) {
 		circBuffer_put(&txBuffer, (uint8_t) frameBuffer[i]);
 	}
-}
-
-void timer1msEvent(void) {
-	
 }

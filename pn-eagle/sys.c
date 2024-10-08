@@ -1,5 +1,5 @@
-#include "sys.h"
 #include <avr/interrupt.h>
+#include "sys.h"
 
 volatile uint32_t sys_time = 0;
 

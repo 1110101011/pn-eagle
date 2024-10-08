@@ -18,10 +18,9 @@ extern encoder_t encoder[CONF_ACTUATOR_COUNT];
 void coreInit(void);
 
 void usartReceivedByteEvent(uint8_t byte);
-void extintEdgeEvent(uint8_t channel, uint8_t dir);
+void extintEdgeEvent(uint8_t channel, int8_t dir);
 void loggerStringToSendEvent(const char *buffer);
 void protocolFrameParsedEvent(int16_t *fieldArray, uint8_t fieldCount);
 void timer200msEvent(void);
-void timer1msEvent(void);
 
 #endif /* CORE_H_ */

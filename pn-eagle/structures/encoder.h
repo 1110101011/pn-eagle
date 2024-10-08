@@ -13,5 +13,8 @@ typedef struct {
 void encoder_init(encoder_t *encoder);
 void encoder_update(encoder_t *encoder, int8_t direction);
 void encoder_process(encoder_t *encoder, uint32_t currentTime);
+void encoder_setCount(encoder_t *encoder, int16_t count);
+int16_t encoder_getCount(encoder_t *encoder);
+int16_t encoder_getSpeed(encoder_t *encoder);
 
 #endif /* ENCODER_H_ */

@@ -14,10 +14,22 @@ void encoder_update(encoder_t *encoder, int8_t direction) {
 void encoder_process(encoder_t *encoder, uint32_t currentTime) {
 	uint32_t timeDelta = currentTime - encoder->lastTime;
 
-	if (timeDelta >= 100) {  // 100ms
+	if (timeDelta >= 10) {  // 10ms
 		encoder->speed = (encoder->count - encoder->lastCount) * (1000 / timeDelta);
 		encoder->lastCount = encoder->count;
 		
 		encoder->lastTime = currentTime;
 	}
+}
+
+void encoder_setCount(encoder_t *encoder, int16_t count) {
+	encoder->count = count;
+}
+
+int16_t encoder_getCount(encoder_t *encoder) {
+	return encoder->count;
+}
+
+int16_t encoder_getSpeed(encoder_t *encoder) {
+	return encoder->speed;
 }

@@ -1,7 +1,9 @@
 #ifndef PROTOCOL_H_
 #define PROTOCOL_H_
 
-#define PROTOCOL_CHANNELS	3
+#define PROTOCOL_CHANNELS			3
+#define PROTOCOL_REQUEST_PREFIX		"MMNR33,"
+#define PROTOCOL_RESPONSE_PREFIX	"MMNT44,"
 
 #include <stdint.h>
 

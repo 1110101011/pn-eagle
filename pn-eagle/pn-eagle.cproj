@@ -69,6 +69,19 @@
       <ToolName>STK500</ToolName>
     </com_atmel_avrdbg_tool_stk500>
     <avrtoolinterfaceclock>125000</avrtoolinterfaceclock>
+    <custom>
+      <ToolOptions>
+        <InterfaceProperties>
+          <IspClock>1748</IspClock>
+        </InterfaceProperties>
+        <InterfaceName>
+        </InterfaceName>
+      </ToolOptions>
+      <ToolType>custom</ToolType>
+      <ToolNumber>
+      </ToolNumber>
+      <ToolName>Custom Programming Tool</ToolName>
+    </custom>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -209,7 +222,16 @@
     <Compile Include="Structures\actuator.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Structures\circ_buffer.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Structures\circ_buffer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Structures\crc.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Structures\crc.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Structures\encoder.c">

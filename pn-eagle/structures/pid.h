@@ -6,18 +6,20 @@
 #include <stdint.h>
 
 typedef struct {
-	int32_t kp;       
-	int32_t ki;        
-	int32_t kd;        
-	int32_t setpoint;  
-	int32_t prev_error; 
-	int32_t integral;  
-	int32_t outputMin; 
+	int32_t kp;
+	int32_t ki;
+	int32_t kd;
+	int32_t outputMin;
 	int32_t outputMax;
 	int32_t integralLimit;
+	int32_t prev_error;
+	int32_t integral;
+	int32_t setpoint;
+	int32_t last_output; // Ostatnie wyjœcie
+	int32_t rampRate;   // Maksymalna zmiana wyjœcia
 } pid_t;
 
-void pid_init(pid_t* pid, int32_t kp, int32_t ki, int32_t kd, int32_t outputMin, int32_t outputMax, int32_t integralLimit);
+void pid_init(pid_t* pid, int32_t kp, int32_t ki, int32_t kd, int32_t outputMin, int32_t outputMax, int32_t integralLimit, int32_t rampRate);
 int16_t pid_update(pid_t* pid, int16_t currentValue);
 void pid_setSetpoint(pid_t* pid, int32_t setpoint);
 

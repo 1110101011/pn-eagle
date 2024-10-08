@@ -1,34 +1,41 @@
-#include "extint.h"
-#include "encoder.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "extint.h"
 
-static void (*edgeCallback)(uint8_t channel, uint8_t dir);
+static void (*edgeCallback)(uint8_t channel, int8_t dir);
 
-void extint_init(void (*edgeEvent)(uint8_t, uint8_t)) {
+static uint8_t lastStateA[3] = {0, 0, 0};
+
+void extint_init(void (*edgeEvent)(uint8_t, int8_t)) {
 	edgeCallback = edgeEvent;
 	
 	PORTD |= (1 << PD0) | (1 << PD1) | (1 << PD2);
 	PORTB |= (1 << PB0) | (1 << PB2) | (1 << PB3);
+}
+
+void extint_poll(void) {
+	uint8_t currentStateA[] = {
+		PIND & (1 << PD0), 
+		PIND & (1 << PD1),
+		PIND & (1 << PD2)
+	};
 	
-	EICRA |= (1 << ISC01);	// INT0 (PD0) falling edge 
-	EICRA |= (1 << ISC11);	// INT1 (PD1) falling edge 
-	EICRA |= (1 << ISC21);	// INT2 (PD2) falling edge 
-
-	EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2);
-}
-
-ISR(INT0_vect) {
-	int8_t dir = (PINB & (1 << PB0)) ? 1 : -1;
-	edgeCallback(0, dir);
-}
-
-ISR(INT1_vect) {
-	int8_t dir = (PINB & (1 << PB2)) ? 1 : -1;
-	edgeCallback(1, dir);
-}
-
-ISR(INT2_vect) {
-	int8_t dir = (PINB & (1 << PB3)) ? 1 : -1;
-	edgeCallback(2, dir);
+	uint8_t currentStateB[] = {
+		PINB & (1 << PB0),
+		PINB & (1 << PB2),
+		PINB & (1 << PB3)
+	};
+	
+	for (uint8_t i = 0; i < 3; i++) {
+		if (currentStateA[i] == 0 && lastStateA[i] > 0) {
+			int8_t dir = (currentStateB[i] > 0) ? 1 : -1;
+			edgeCallback(i, dir);
+		}
+		else if (currentStateA[i] > 0 && lastStateA[i] == 0) {
+			int8_t dir = (currentStateB[i] > 0) ? -1 : 1;
+			edgeCallback(i, dir);
+		}
+		
+		lastStateA[i] = currentStateA[i];
+	}
 }

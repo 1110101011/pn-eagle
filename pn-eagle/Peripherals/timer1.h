@@ -1,8 +1,8 @@
 #ifndef TIMER1_H_
 #define TIMER1_H_
 
-#define TIMER1_TOP			666
-#define TIMER1_CHANNEL_NUM	3
+#define TIMER1_TOP				666
+#define TIMER1_CHANNEL_NUM		3
 
 #include <avr/io.h>
 

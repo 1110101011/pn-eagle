@@ -1,13 +1,13 @@
 #ifndef INC_ACTUATOR_H_
 #define INC_ACTUATOR_H_
 
-#define ACTUATOR_PROCESS_PERIOD		1		// ms
+#define ACTUATOR_PROCESS_PERIOD			1		// ms
 
-#define ACTUATOR_PID_KP				40000
-#define ACTUATOR_PID_KI				500
-#define ACTUATOR_PID_KD				1000
-#define ACTUATOR_INTEGRAL_LIMIT		100
-
+#define ACTUATOR_PID_KP					5000
+#define ACTUATOR_PID_KI					500
+#define ACTUATOR_PID_KD					2400
+#define ACTUATOR_PID_INTEGRAL_LIMIT		200
+#define ACTUATOR_PID_RAMP_RATE			5
 
 #include <stdint.h>
 #include "gpio.h"
@@ -16,6 +16,8 @@
 
 typedef enum {
 	STATE_NORMAL,
+	STATE_ATTEMPTING_RETURN,
+	STATE_ATTEMPTING,
 	STATE_ERROR,
 	STATE_HOMING_COARSE,
 	STATE_HOMING_RETURN,
@@ -42,8 +44,10 @@ typedef struct {
 	int16_t targetPos;
 	int16_t speed;
 	int16_t lastSpeed;
-	uint8_t homingDone;
 	uint16_t homingTime;
+	
+	uint8_t attemptCount;
+	int16_t blockedPos;
 } actuator_t;
 
 void actuator_init(actuator_t* actuator, const gpio_t *dirGpio, uint8_t dirPin, uint8_t pwmChannel, encoder_t *encoder);

@@ -1,5 +1,5 @@
-#include "timer1.h"
 #include <avr/io.h>
+#include "timer1.h"
 
 void timer1_init(void) {
 	DDRB |= 

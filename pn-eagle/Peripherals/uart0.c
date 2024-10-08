@@ -28,7 +28,7 @@ void uart0_init(uint16_t baud, void (*receivedByteEvent)(uint8_t)) {
 		(1 << UCSZ00);
 }
 
-uint8_t uart0_readyToSend(void) {
+uint8_t uart0_isReady(void) {
 	return UCSR0A & (1 << UDRE0);
 }
 
