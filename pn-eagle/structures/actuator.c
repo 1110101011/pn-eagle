@@ -44,12 +44,12 @@ void actuator_startHoming(actuator_t* actuator) {
 }
 
 void actuator_setTargetPos(actuator_t* actuator, int16_t targetPos) {
-	if (actuator->state == STATE_HOMING_COARSE || actuator->state == STATE_HOMING_RETURN || actuator->state == STATE_HOMING_FINE) {
+	if (actuator->state == STATE_HOMING_COARSE || actuator->state == STATE_HOMING_RETURN || actuator->state == STATE_HOMING_FINE || actuator->state == STATE_ATTEMPTING || actuator->state == STATE_ATTEMPTING_RETURN) {
 		return;
 	}
 	
-	if (targetPos > CONF_ACTUATOR_RANGE) {
-		targetPos = CONF_ACTUATOR_RANGE;
+	if (targetPos > (CONF_ACTUATOR_RANGE * 2)) {
+		targetPos = (CONF_ACTUATOR_RANGE * 2);
 	}
 	
 	actuator->targetPos = targetPos;
@@ -151,7 +151,6 @@ void actuator_process(actuator_t* actuator, uint32_t currentTime) {
 				actuator->stopTime = 0;
 				encoder_setCount(actuator->encoder, 0);
 				pid_setSetpoint(&actuator->pid, 60);
-				//actuator->speed = 200;
 				actuator->state = STATE_HOMING_RETURN;
 			}	
 		} else {

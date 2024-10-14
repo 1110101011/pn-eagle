@@ -1,91 +1,92 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
 #include "protocol.h"
-#include "circ_buffer.h"
 #include "logger.h"
 #include "crc.h"
+#include "util.h"
 
 static const char requestPrefix[] = PROTOCOL_REQUEST_PREFIX;
 static const char responsePrefix[] = PROTOCOL_RESPONSE_PREFIX;
 
 static void (*protocolFrameParsedCallback)(int16_t *fieldArray, uint8_t fieldCount);
 
-static uint8_t requestBufferData[64];
-static circ_buffer_t requestBuffer;
-static char requestFrame[64];
-
 static char answerFrame[64];
+static char requestFrame[64];
+uint8_t frameByteIndex = 0;
+
+uint8_t prefixByteIndex = 0;
+uint8_t lastCommaIndex = 0;
+
+char frameFieldBuffer[8] = {0};
+uint8_t frameFieldBufferIndex = 0;
+
+int16_t frameFieldArray[16];
+uint8_t frameFieldNum = 0;
 
 void protocol_init(void (*protocolFrameParsedEvent)(int16_t*, uint8_t)) {
 	protocolFrameParsedCallback = protocolFrameParsedEvent;
-	circBuffer_init(&requestBuffer, requestBufferData, sizeof(requestBufferData));
+}
+
+static inline void protocol_reset(void) {
+	frameFieldBufferIndex = 0;
+	prefixByteIndex = 0;
+	frameByteIndex = 0;
+	frameFieldNum = 0;
+	lastCommaIndex = 0;
 }
 
 void protocol_newByte(uint8_t byte) {
 	if (byte == '\r' || byte == '\n') {
-	    if (circBuffer_elements(&requestBuffer) <= strlen(requestPrefix)) {
-	        circBuffer_clear(&requestBuffer);
-	        return;
-	    }
-	    
-		uint8_t prefixIndex = 0;
-		uint8_t frameIndex = 0;
-		
-		while (circBuffer_elements(&requestBuffer)) {
-			uint8_t byte = circBuffer_get(&requestBuffer);
-			
-			if (prefixIndex >= strlen(requestPrefix)) {
-				requestFrame[frameIndex++] = byte;
-			} else if (byte == requestPrefix[prefixIndex]) {
-				requestFrame[frameIndex++] = byte;
-				prefixIndex++;
-			} else {
-			    circBuffer_clear(&requestBuffer);
-			    return;
-			}
-		}
-		requestFrame[frameIndex] = '\0';
-		
-		int16_t frameFieldArray[16];
-		uint8_t frameFieldNum;
-		
-		protocol_parseFrame(requestFrame, frameFieldArray, &frameFieldNum);
-		
-		char *lastComma = strrchr(requestFrame, ',');
-		if (lastComma != NULL) {
-			*(lastComma + 1) = '\0'; 
-		}
-		
-		uint8_t crc = crc_calc((uint8_t*) requestFrame, strlen(requestFrame));
-			
-		if (crc != frameFieldArray[frameFieldNum - 1]) {
-			circBuffer_clear(&requestBuffer);
+		if (prefixByteIndex < PROTOCOL_REQUEST_PREFIX_LEN) {
+			protocol_reset();
 			return;
 		}
 		
-		protocolFrameParsedCallback(frameFieldArray, frameFieldNum - 1);
-		circBuffer_clear(&requestBuffer);
-	} else {
-		circBuffer_put(&requestBuffer, byte);
-	}
-}
-
-void protocol_parseFrame(char *frame, int16_t *fieldArray, uint8_t *fieldNum) {
-	char temp[64];
-	strcpy(temp, frame);
-
-	char *token = strtok(temp, ",");
-	token = strtok(NULL, ",");		// pominiecie pierwszego tokenu z prefixem
+		frameFieldArray[frameFieldNum++] = fast_atoin(frameFieldBuffer, frameFieldBufferIndex);
 		
-	uint8_t index = 0;
-
-	while (token != NULL) {
-		fieldArray[index++] = atoi(token);  
-		token = strtok(NULL, ",");
+		uint8_t frameCrc = frameFieldArray[frameFieldNum - 1];
+		uint8_t crc = crc_calc((uint8_t*) requestFrame, lastCommaIndex);
+		
+		if (crc == frameCrc || frameCrc == 0) {
+			protocolFrameParsedCallback(frameFieldArray, frameFieldNum - 1);
+		}	
+		
+		protocol_reset();
+		
+	} else if (prefixByteIndex >= PROTOCOL_REQUEST_PREFIX_LEN) {
+		requestFrame[frameByteIndex] = byte;
+		
+		if (frameByteIndex < sizeof(requestFrame) - 1) {
+			frameByteIndex++;
+		} else {
+			protocol_reset();
+		}
+		
+		if (byte == ',') {
+			frameFieldArray[frameFieldNum] = fast_atoin(frameFieldBuffer, frameFieldBufferIndex);
+			lastCommaIndex = frameByteIndex;
+			frameFieldBufferIndex = 0;
+			
+			if (frameFieldNum < sizeof(frameFieldArray) - 2) {
+				frameFieldNum++;
+			} else {
+				protocol_reset();
+			}
+		} else if (frameFieldBufferIndex < sizeof(frameFieldBuffer) - 1) {
+			frameFieldBuffer[frameFieldBufferIndex++] = byte;
+		} else {
+			protocol_reset();
+		}
+	
+	} else if (byte == requestPrefix[prefixByteIndex]) {
+		requestFrame[frameByteIndex++] = byte;
+		prefixByteIndex++;
+		
+	} else {
+		protocol_reset();
 	}
-
-	*fieldNum = index;
 }
 
 char* protocol_generateAnswer(int16_t *fieldArray, uint8_t fieldNum) {

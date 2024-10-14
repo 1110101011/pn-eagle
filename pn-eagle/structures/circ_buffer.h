@@ -22,8 +22,12 @@ static inline uint8_t circBuffer_capacity(circ_buffer_t *buffer) {
 	return (buffer->tail - buffer->head - 1) & buffer->mask;
 }
 
-static inline void circBuffer_put(circ_buffer_t *buffer, uint8_t element) {
-	while (!circBuffer_capacity(buffer));
+static inline void circBuffer_putBlocking(circ_buffer_t *buffer, uint8_t element) {
+//	while (!circBuffer_capacity(buffer));
+	buffer->buffer[buffer->head++ & buffer->mask] = element;
+}
+
+static inline void circBuffer_putOverwrite(circ_buffer_t *buffer, uint8_t element) {
 	buffer->buffer[buffer->head++ & buffer->mask] = element;
 }
 

@@ -26,13 +26,14 @@ void extint_poll(void) {
 		PINB & (1 << PB3)
 	};
 	
+	int8_t dir;
+	
 	for (uint8_t i = 0; i < 3; i++) {
 		if (currentStateA[i] == 0 && lastStateA[i] > 0) {
-			int8_t dir = (currentStateB[i] > 0) ? 1 : -1;
+			dir = (currentStateB[i] > 0) ? 1 : -1;
 			edgeCallback(i, dir);
-		}
-		else if (currentStateA[i] > 0 && lastStateA[i] == 0) {
-			int8_t dir = (currentStateB[i] > 0) ? -1 : 1;
+		} else if (currentStateA[i] > 0 && lastStateA[i] == 0) {
+			dir = (currentStateB[i] > 0) ? -1 : 1;
 			edgeCallback(i, dir);
 		}
 		

@@ -30,7 +30,7 @@ void coreInit(void) {
 }
 
 void usartReceivedByteEvent(uint8_t byte) {
-	circBuffer_put(&rxBuffer, byte);
+	circBuffer_putBlocking(&rxBuffer, byte);
 }
 
 void extintEdgeEvent(uint8_t channel, int8_t dir) {
@@ -39,7 +39,7 @@ void extintEdgeEvent(uint8_t channel, int8_t dir) {
 
 void loggerStringToSendEvent(const char *buffer) {
 	while (*buffer) {
-		circBuffer_put(&txBuffer, (uint8_t) *buffer++);
+		circBuffer_putBlocking(&txBuffer, (uint8_t) *buffer++);
 	}
 }
 
@@ -78,6 +78,6 @@ void timer200msEvent(void) {
 	char *frameBuffer = protocol_generateAnswer(fieldArray, sizeof(fieldArray) / sizeof(fieldArray[0]));
 	
 	for (uint8_t i = 0; i < strlen(frameBuffer); i++) {
-		circBuffer_put(&txBuffer, (uint8_t) frameBuffer[i]);
+		circBuffer_putBlocking(&txBuffer, (uint8_t) frameBuffer[i]);
 	}
 }

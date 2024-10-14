@@ -20,7 +20,7 @@ int main(void) {
 	sei();
 	
 	sys_init();
-
+	
     uart0_init(CONF_UART_BAUD, usartReceivedByteEvent);
 	logger_init(loggerStringToSendEvent);
 	circBuffer_init(&rxBuffer, rxBufferData, sizeof(rxBufferData));
@@ -50,18 +50,17 @@ int main(void) {
 			uart0_sendByte(byte);
 		}
 		
+		for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
+			encoder_process(&encoder[i], sys_time);
+			actuator_process(&actuator[i], sys_time);
+		}
+		
 		if (tim200ms_nextTime <= sys_time) {
 			timer200msEvent();
 			tim200ms_nextTime = sys_time + 200;
 		}
 		
 		extint_poll();
-		
-		for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
-			encoder_process(&encoder[i], sys_time);
-			actuator_process(&actuator[i], sys_time);
-		}
-
 		
 		wdt_reset();
     }

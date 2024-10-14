@@ -12,8 +12,8 @@ void pid_init(pid_t* pid, int32_t kp, int32_t ki, int32_t kd, int32_t outputMin,
 	pid->prev_error = 0;
 	pid->integral = 0;
 	pid->setpoint = 0;
-	pid->last_output = 0; // Inicjalizacja ostatniego wyjœcia
-	pid->rampRate = rampRate; // Ustawienie maksymalnej zmiany wyjœcia
+	pid->last_output = 0; 
+	pid->rampRate = rampRate;
 }
 
 int16_t pid_update(pid_t* pid, int16_t currentValue) {
@@ -31,35 +31,31 @@ int16_t pid_update(pid_t* pid, int16_t currentValue) {
 		pid->integral = -pid->integralLimit;
 	}
 
-	// Obliczanie wyjœcia PID
 	int32_t output = (pid->kp * error + pid->ki * pid->integral + pid->kd * derivative) / PID_SCALE_FACTOR;
 
-	// Ustawienie ograniczeñ wyjœcia
 	if (output > pid->outputMax) {
 		output = pid->outputMax;
 		} else if (output < pid->outputMin) {
 		output = pid->outputMin;
 	}
 
-	// £agodne przyspieszanie - ograniczanie zmiany wyjœcia
 	if (output > pid->last_output) {
 		output = pid->last_output + pid->rampRate;
 		if (output > pid->outputMax) {
-			output = pid->outputMax; // Upewnij siê, ¿e nie przekracza maksymalnego wyjœcia
+			output = pid->outputMax; 
 		}
 		} else if (output < pid->last_output) {
 		output = pid->last_output - pid->rampRate;
 		if (output < pid->outputMin) {
-			output = pid->outputMin; // Upewnij siê, ¿e nie przekracza minimalnego wyjœcia
+			output = pid->outputMin; 
 		}
 	}
 
-	pid->last_output = output; // Aktualizacja ostatniego wyjœcia
-	pid->prev_error = error; // Aktualizacja poprzedniego b³êdu
-	return (int16_t) output; // Zwracanie wyjœcia
+	pid->last_output = output; 
+	pid->prev_error = error;
+	return (int16_t) output; 
 }
 
 void pid_setSetpoint(pid_t* pid, int32_t setpoint) {
 	pid->setpoint = setpoint;
-	pid->integral = 0;
 }
