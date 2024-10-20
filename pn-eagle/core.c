@@ -16,13 +16,13 @@ encoder_t encoder[CONF_ACTUATOR_COUNT];
 void coreInit(void) {
 	protocol_init(protocolFrameParsedEvent);
 	
-	encoder_init(&encoder[0]);
-	encoder_init(&encoder[1]);
-	encoder_init(&encoder[2]);
+	encoder_init(&encoder[0], 1);
+	encoder_init(&encoder[1], 0);
+	encoder_init(&encoder[2], 0);
 	
-	actuator_init(&actuator[0], &gpio_d, 4, 0, &encoder[0]);
-	actuator_init(&actuator[1], &gpio_d, 5, 1, &encoder[1]);
-	actuator_init(&actuator[2], &gpio_d, 6, 2, &encoder[2]);
+	actuator_init(&actuator[0], &gpio_d, 4, 0, &encoder[0], 1);
+	actuator_init(&actuator[1], &gpio_d, 5, 1, &encoder[1], 0);
+	actuator_init(&actuator[2], &gpio_d, 6, 2, &encoder[2], 0);
 	
 	for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
 		actuator_startHoming(&actuator[i]);

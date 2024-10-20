@@ -36,6 +36,7 @@ typedef struct {
 	uint8_t pwmChannel;
 	encoder_t *encoder;
 	pid_t pid;
+	uint8_t reverse;
 	
 	actuator_state_t state;
 	actuator_error_t errorCode;
@@ -50,7 +51,7 @@ typedef struct {
 	int16_t blockedPos;
 } actuator_t;
 
-void actuator_init(actuator_t* actuator, const gpio_t *dirGpio, uint8_t dirPin, uint8_t pwmChannel, encoder_t *encoder);
+void actuator_init(actuator_t* actuator, const gpio_t *dirGpio, uint8_t dirPin, uint8_t pwmChannel, encoder_t *encoder, uint8_t reverse);
 void actuator_startHoming(actuator_t* actuator);
 void actuator_setTargetPos(actuator_t* actuator, int16_t targetPos);
 int16_t actuator_getTargetPos(actuator_t* actuator);

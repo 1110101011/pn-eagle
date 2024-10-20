@@ -8,11 +8,12 @@ static inline uint8_t actuator_isStopped(actuator_t* actuator);
 static inline uint8_t actuator_isBlocked(actuator_t* actuator);
 static  void actuator_control(actuator_t* actuator, int16_t speed);
 
-void actuator_init(actuator_t* actuator, const gpio_t *dirGpio, uint8_t dirPin, uint8_t pwmChannel, encoder_t *encoder) {
+void actuator_init(actuator_t* actuator, const gpio_t *dirGpio, uint8_t dirPin, uint8_t pwmChannel, encoder_t *encoder, uint8_t reverse) {
 	actuator->dirGpio = dirGpio;
 	actuator->dirPin = dirPin;
 	actuator->pwmChannel = pwmChannel;
 	actuator->encoder = encoder;
+	actuator->reverse = reverse;
 	
 	actuator->state = STATE_NORMAL;
 	
@@ -50,6 +51,10 @@ void actuator_setTargetPos(actuator_t* actuator, int16_t targetPos) {
 	
 	if (targetPos > (CONF_ACTUATOR_RANGE * 2)) {
 		targetPos = (CONF_ACTUATOR_RANGE * 2);
+	}
+	
+	if (actuator->targetPos == targetPos) {
+		return;
 	}
 	
 	actuator->targetPos = targetPos;
@@ -232,9 +237,9 @@ static inline uint8_t actuator_isBlocked(actuator_t* actuator) {
 }
 
 static void actuator_control(actuator_t* actuator, int16_t speed) {
-	if (speed > 0) {
+	if ((speed > 0 && !actuator->reverse) || (speed < 0 && actuator->reverse)) {
 		gpio_pinSet(actuator->dirGpio, actuator->dirPin, 0);
-	} else if (speed < 0) {
+	} else {
 		gpio_pinSet(actuator->dirGpio, actuator->dirPin, 1);
 	}
 	
