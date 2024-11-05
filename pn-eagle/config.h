@@ -1,7 +1,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#define VERSION_STRING					"v1.06"
+#define VERSION_STRING					"v1.07"
 #define CONF_UART_BAUD					9600
 
 #define CONF_ACTUATOR_COUNT				3		// liczba silownikow

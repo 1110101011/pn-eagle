@@ -31,11 +31,11 @@ void actuator_init(actuator_t* actuator, const gpio_t *dirGpio, uint8_t dirPin, 
 }
 
 void actuator_startHoming(actuator_t* actuator) {
-	if (actuator->state == STATE_HOMING_COARSE || actuator->state == STATE_HOMING_RETURN || actuator->state == STATE_HOMING_FINE) {
+	if (actuator->state == STATE_HOMING_RETURN || actuator->state == STATE_HOMING) {
 		return;
 	}
 	
-	actuator->state = STATE_HOMING_COARSE;
+	actuator->state = STATE_HOMING_RETURN;
 	actuator->errorCode = ERROR_OK_HOMING;
 	actuator->homingTime = 0;
 	actuator->stopTime = 0;
@@ -45,7 +45,7 @@ void actuator_startHoming(actuator_t* actuator) {
 }
 
 void actuator_setTargetPos(actuator_t* actuator, int16_t targetPos) {
-	if (actuator->state == STATE_HOMING_COARSE || actuator->state == STATE_HOMING_RETURN || actuator->state == STATE_HOMING_FINE || actuator->state == STATE_ATTEMPTING || actuator->state == STATE_ATTEMPTING_RETURN) {
+	if (actuator->state == STATE_HOMING_RETURN || actuator->state == STATE_HOMING || actuator->state == STATE_ATTEMPTING || actuator->state == STATE_ATTEMPTING_RETURN) {
 		return;
 	}
 	
@@ -86,7 +86,7 @@ void actuator_process(actuator_t* actuator, uint32_t currentTime) {
 		actuator->lastTime = currentTime;
 	}
 	
-	if (actuator->state == STATE_NORMAL || actuator->state == STATE_ATTEMPTING || actuator->state == STATE_ATTEMPTING_RETURN || actuator->state == STATE_HOMING_COARSE || actuator->state == STATE_HOMING_RETURN) {
+	if (actuator->state == STATE_NORMAL || actuator->state == STATE_ATTEMPTING || actuator->state == STATE_ATTEMPTING_RETURN || actuator->state == STATE_HOMING_RETURN) {
 		int16_t pos = actuator_getCurrentPos(actuator);
 		actuator->speed = pid_update(&actuator->pid, pos);	
 	}
@@ -146,8 +146,8 @@ void actuator_process(actuator_t* actuator, uint32_t currentTime) {
 			actuator->state = STATE_ATTEMPTING;
 		}
 		break;
-		
-	case STATE_HOMING_COARSE:
+
+	case STATE_HOMING_RETURN:
 		if (actuator_isStopped(actuator)) {
 			actuator->stopTime += timeDelta;
 			
@@ -155,9 +155,9 @@ void actuator_process(actuator_t* actuator, uint32_t currentTime) {
 				actuator->homingTime = 0;
 				actuator->stopTime = 0;
 				encoder_setCount(actuator->encoder, 0);
-				pid_setSetpoint(&actuator->pid, 60);
-				actuator->state = STATE_HOMING_RETURN;
-			}	
+				actuator->speed = 120;
+				actuator->state = STATE_HOMING;
+			}
 		} else {
 			actuator->homingTime += timeDelta;
 			actuator->stopTime = 0;
@@ -171,38 +171,16 @@ void actuator_process(actuator_t* actuator, uint32_t currentTime) {
 		}
 		break;
 	
-	case STATE_HOMING_RETURN:
-		if (actuator->encoder->count >= 60) {
-			actuator->speed = -120;
-			actuator->homingTime = 0;
-			actuator->state = STATE_HOMING_FINE;
-		} else {
-			actuator->homingTime += timeDelta;
-			
-			if (actuator->homingTime >= 5000) {
-				actuator->speed = 0;
-				encoder_setCount(actuator->encoder, 0);
-				actuator->errorCode = ERROR_BLOCKED;
-				actuator->state = STATE_ERROR;
-			}
-		}
-		break;
-	
-	case STATE_HOMING_FINE:
-		if (actuator_isStopped(actuator)) {
-			actuator->stopTime += timeDelta;
-			
-			if (actuator->stopTime >= 2000) {
-				actuator->speed = 0;
-				encoder_setCount(actuator->encoder, -CONF_ACTUATOR_OFFSET * 2);
-				pid_setSetpoint(&actuator->pid, 0);
-				actuator->stopTime = 0;
-				actuator->errorCode = ERROR_OK;
-				actuator->state = STATE_NORMAL;
-			}	
-		} else {
-			actuator->homingTime += timeDelta;
+	case STATE_HOMING:
+		if (encoder_getCount(actuator->encoder) > 0) {
+			actuator->speed = 0;
+			encoder_setCount(actuator->encoder, -CONF_ACTUATOR_OFFSET * 2);
+			pid_setSetpoint(&actuator->pid, 0);
 			actuator->stopTime = 0;
+			actuator->errorCode = ERROR_OK;
+			actuator->state = STATE_NORMAL;
+		} else {
+			actuator->homingTime += timeDelta;
 			
 			if (actuator->homingTime >= 5000) {
 				actuator->speed = 0;
@@ -212,7 +190,7 @@ void actuator_process(actuator_t* actuator, uint32_t currentTime) {
 			}
 		}
 		break;
-	
+		
 	case STATE_ERROR:
 		actuator->speed = 0;
 		break;
