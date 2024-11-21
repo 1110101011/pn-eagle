@@ -21,10 +21,8 @@ int main(void) {
 	
 	sys_init();
 	
-    uart0_init(CONF_UART_BAUD, usartReceivedByteEvent);
+    uart0_init(CONF_UART_BAUD);
 	logger_init(loggerStringToSendEvent);
-	circBuffer_init(&rxBuffer, rxBufferData, sizeof(rxBufferData));
-	circBuffer_init(&txBuffer, txBufferData, sizeof(txBufferData));
 	
 	timer1_init();
 	extint_init(extintEdgeEvent);
@@ -40,14 +38,9 @@ int main(void) {
 	coreInit();
 	
     while (1) {
-		if (circBuffer_elements(&rxBuffer)) {
-			uint8_t byte = circBuffer_get(&rxBuffer);
+		while (uart0_dataToRead() > 0) {
+			uint8_t byte = uart0_readData();
 			protocol_newByte(byte);
-		}
-		
-		if (circBuffer_elements(&txBuffer) && uart0_isReady()) {
-			uint8_t byte = circBuffer_get(&txBuffer);
-			uart0_sendByte(byte);
 		}
 		
 		for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {

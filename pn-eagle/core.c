@@ -2,13 +2,9 @@
 #include <string.h>
 #include "core.h"
 #include "logger.h"
+#include "uart0.h"
 #include "protocol.h"
 #include "config.h"
-
-uint8_t rxBufferData[128];
-uint8_t txBufferData[128];
-circ_buffer_t rxBuffer;
-circ_buffer_t txBuffer;
 
 actuator_t actuator[CONF_ACTUATOR_COUNT];
 encoder_t encoder[CONF_ACTUATOR_COUNT];
@@ -29,18 +25,12 @@ void coreInit(void) {
 	}
 }
 
-void usartReceivedByteEvent(uint8_t byte) {
-	circBuffer_putBlocking(&rxBuffer, byte);
-}
-
 void extintEdgeEvent(uint8_t channel, int8_t dir) {
 	encoder_update(&encoder[channel], dir);
 }
 
 void loggerStringToSendEvent(const char *buffer) {
-	while (*buffer) {
-		circBuffer_putBlocking(&txBuffer, (uint8_t) *buffer++);
-	}
+	uart0_sendData((uint8_t*) buffer, strlen(buffer));
 }
 
 void protocolFrameParsedEvent(int16_t *fieldArray, uint8_t fieldCount) {
@@ -77,7 +67,5 @@ void timer200msEvent(void) {
 	
 	char *frameBuffer = protocol_generateAnswer(fieldArray, sizeof(fieldArray) / sizeof(fieldArray[0]));
 	
-	for (uint8_t i = 0; i < strlen(frameBuffer); i++) {
-		circBuffer_putBlocking(&txBuffer, (uint8_t) frameBuffer[i]);
-	}
+	uart0_sendData((uint8_t*) frameBuffer, strlen(frameBuffer));
 }
