@@ -37,7 +37,8 @@ static inline void protocol_reset(void) {
 	lastCommaIndex = 0;
 }
 
-void protocol_newByte(uint8_t byte) {
+// Wersja oryginalna na prawid³ow¹ ramkê
+/*void protocol_newByte(uint8_t byte) {
 	if (byte == '\r' || byte == '\n') {
 		if (prefixByteIndex < PROTOCOL_REQUEST_PREFIX_LEN) {
 			protocol_reset();
@@ -84,6 +85,43 @@ void protocol_newByte(uint8_t byte) {
 		requestFrame[frameByteIndex++] = byte;
 		prefixByteIndex++;
 		
+	} else {
+		protocol_reset();
+	}
+}*/
+
+// Wersja na ramkê skrócon¹ w formacie MMNR33,pozA,pozB,
+void protocol_newByte(uint8_t byte) {
+	if (prefixByteIndex >= PROTOCOL_REQUEST_PREFIX_LEN) {
+		requestFrame[frameByteIndex] = byte;
+		
+		if (frameByteIndex < sizeof(requestFrame) - 1) {
+			frameByteIndex++;
+		} else {
+			protocol_reset();
+			return;
+		}
+
+		if (byte == ',') {
+			frameFieldArray[frameFieldNum] = fast_atoin(frameFieldBuffer, frameFieldBufferIndex);
+			frameFieldBufferIndex = 0;
+			
+			if (frameFieldNum < PROTOCOL_CHANNELS - 1) {
+				frameFieldNum++;
+			} else {
+				protocolFrameParsedCallback(frameFieldArray, frameFieldNum + 1);
+				protocol_reset();
+				return;
+			}
+		} else if (frameFieldBufferIndex < sizeof(frameFieldBuffer) - 1) {
+			frameFieldBuffer[frameFieldBufferIndex++] = byte;
+		} else {
+			protocol_reset();
+			return;
+		}
+	} else if (byte == requestPrefix[prefixByteIndex]) {
+		requestFrame[frameByteIndex++] = byte;
+		prefixByteIndex++;
 	} else {
 		protocol_reset();
 	}
