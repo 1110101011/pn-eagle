@@ -29,9 +29,8 @@ int main(void) {
 	extint_init(extintEdgeEvent);
 	
 	logger_print("Start programu\n");
-	logger_print("Wersja: ");
-	logger_print(VERSION_STRING);
-	logger_print(logger_endl);
+	logger_print("Wersja: " VERSION_STRING "\n");
+	logger_print("Kompatybilnosc: " VERSION_COMPATIBILITY "\n");
 	logger_printValue("Liczba silownikow: ", CONF_ACTUATOR_COUNT);
 	logger_printValue("Zakres pracy: ", CONF_ACTUATOR_RANGE);
 	logger_print(logger_endl);

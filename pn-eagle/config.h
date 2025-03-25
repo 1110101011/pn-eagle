@@ -1,7 +1,8 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#define VERSION_STRING					"v1.08"
+#define VERSION_STRING					"v1.09"
+#define VERSION_COMPATIBILITY			"langren"
 #define CONF_UART_BAUD					9600
 
 #define CONF_ACTUATOR_COUNT				2		// liczba silownikow

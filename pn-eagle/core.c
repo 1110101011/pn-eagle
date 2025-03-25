@@ -54,16 +54,14 @@ void protocolFrameParsedEvent(int16_t *fieldArray, uint8_t fieldCount) {
 }
 
 void timer200msEvent(void) {
-	int16_t fieldArray[CONF_ACTUATOR_COUNT * 3];
+	int16_t fieldArray[(CONF_ACTUATOR_COUNT * 2) + 1];
 	
 	for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
-		fieldArray[i * 2] = actuator_getCurrentPos(&actuator[i]) / 2;
-		fieldArray[(i * 2) + 1] = actuator_getTargetPos(&actuator[i]) / 2;
+		fieldArray[i] = actuator_getCurrentPos(&actuator[i]) / 2;
+		fieldArray[i + CONF_ACTUATOR_COUNT] = actuator_getTargetPos(&actuator[i]) / 2;
 	}
 	
-	for (uint8_t i = 0; i < CONF_ACTUATOR_COUNT; i++) {
-		fieldArray[(CONF_ACTUATOR_COUNT * 2) + i] = actuator_getErrorCode(&actuator[i]);
-	}
+	fieldArray[CONF_ACTUATOR_COUNT * 2] = 0;
 	
 	char *frameBuffer = protocol_generateAnswer(fieldArray, sizeof(fieldArray) / sizeof(fieldArray[0]));
 	
